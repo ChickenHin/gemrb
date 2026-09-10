@@ -5,11 +5,7 @@
 name: Builders
 
 on:
-  push:
-    branches: [ master ]
-    tags: [ '**' ]
-  pull_request:
-    branches: [ master ]
+  workflow_dispatch: 
 
 jobs:
   tester:
@@ -105,33 +101,33 @@ jobs:
         if grep -q '^v[01]\.[0-9].[0-9]' <<< "${GITHUB_REF}"; then make fetch-demo-data; fi &&
         make install
 
-    - name: Show build cache stats
-      run: |
-        command -v sccache &&
-        sccache -s
+    # - name: Show build cache stats
+    #   run: |
+    #     command -v sccache &&
+    #     sccache -s
 
-    - name: Set up SSH
-      uses: kielabokkie/ssh-key-and-known-hosts-action@151931a36dd69934d46acc72b38939737db04e6f
-      if: github.event_name == 'push'
-      with:
-        ssh-private-key: ${{ secrets.SSH_SF_PRIVATE_KEY }}
-        ssh-host: frs.sourceforge.net
+    # - name: Set up SSH
+    #   uses: kielabokkie/ssh-key-and-known-hosts-action@151931a36dd69934d46acc72b38939737db04e6f
+    #   if: github.event_name == 'push'
+    #   with:
+    #     ssh-private-key: ${{ secrets.SSH_SF_PRIVATE_KEY }}
+    #     ssh-host: frs.sourceforge.net
 
-    - name: Upload
-      if: github.event_name == 'push'
-      run: |
-        # NOTE: only do it on clang builds if we ever add more compilers
-        filepath=Apple/OSX
-        tarpath=/Applications/gemrb.app
+    # - name: Upload
+    #   if: github.event_name == 'push'
+    #   run: |
+    #     # NOTE: only do it on clang builds if we ever add more compilers
+    #     filepath=Apple/OSX
+    #     tarpath=/Applications/gemrb.app
 
-        # there are no tags, so improvise
-        version=$({ date +%F; git describe --always; } | tr -d '\n') || exit 14
-        file=gemrb-$version.tar.bz2
-        tar cjf $file $tarpath || exit 15
+    #     # there are no tags, so improvise
+    #     version=$({ date +%F; git describe --always; } | tr -d '\n') || exit 14
+    #     file=gemrb-$version.tar.bz2
+    #     tar cjf $file $tarpath || exit 15
 
-        filepath="$filepath/$file"
-        scp -v "$file" \
-        "gemrb-travisbot@frs.sourceforge.net:/home/frs/project/gemrb/botbins/$filepath"
+    #     filepath="$filepath/$file"
+    #     scp -v "$file" \
+    #     "gemrb-travisbot@frs.sourceforge.net:/home/frs/project/gemrb/botbins/$filepath"
 
   linux:
     name: Linux AppImage build
@@ -212,21 +208,21 @@ jobs:
         command -v sccache
         sccache -s
 
-    - name: Set up SSH
-      uses: kielabokkie/ssh-key-and-known-hosts-action@151931a36dd69934d46acc72b38939737db04e6f
-      if: github.event_name == 'push'
-      with:
-        ssh-private-key: ${{ secrets.SSH_SF_PRIVATE_KEY }}
-        ssh-host: frs.sourceforge.net
+    # - name: Set up SSH
+    #   uses: kielabokkie/ssh-key-and-known-hosts-action@151931a36dd69934d46acc72b38939737db04e6f
+    #   if: github.event_name == 'push'
+    #   with:
+    #     ssh-private-key: ${{ secrets.SSH_SF_PRIVATE_KEY }}
+    #     ssh-host: frs.sourceforge.net
 
-    - name: Upload
-      if: github.event_name == 'push'
-      run: |
-        # NOTE: only do it on gcc builds if we ever add more compilers
-        filepath=Linux
-        filei=build/GemRB-*.AppImage
-        fileo=GemRB-$(date +%F)-${GITHUB_REF##*/}-${GITHUB_SHA:0:10}-x86_64.AppImage
+    # - name: Upload
+    #   if: github.event_name == 'push'
+    #   run: |
+    #     # NOTE: only do it on gcc builds if we ever add more compilers
+    #     filepath=Linux
+    #     filei=build/GemRB-*.AppImage
+    #     fileo=GemRB-$(date +%F)-${GITHUB_REF##*/}-${GITHUB_SHA:0:10}-x86_64.AppImage
 
-        filepath="$filepath/$fileo"
-        scp $filei \
-        gemrb-travisbot@frs.sourceforge.net:/home/frs/project/gemrb/Buildbot\\\ Binaries/$filepath
+    #     filepath="$filepath/$fileo"
+    #     scp $filei \
+    #     gemrb-travisbot@frs.sourceforge.net:/home/frs/project/gemrb/Buildbot\\\ Binaries/$filepath
